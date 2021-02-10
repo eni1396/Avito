@@ -9,50 +9,35 @@ import UIKit
 
 class MainViewController: UIViewController {
     
-    //массив со свойстами из модели
-    var items = [InfoModel]()
-    
-    // массив индексов выбранных ячеек
-    var selectedCellIndex = [IndexPath]()
-    
-    //MARK:- объявление элементов интерфейса
+   private var items = [InfoModel]()
+   private var selectedCellIndex = [IndexPath]()
+   
     @IBOutlet weak var mainTitle: UILabel!
-    @IBOutlet weak var xMarkImage: UIImageView! {
-        didSet {
-            xMarkImage.image = UIImage(named: "xmark")
-        }
-    }
-    @IBOutlet weak var buttonLabel: UIButton! {
-        didSet {
-            buttonLabel.layer.cornerRadius = 5
-        }
-    }
-    @IBOutlet weak var collectionView: UICollectionView! {
-        didSet {
-            collectionView.layer.cornerRadius = 5
-            collectionView.dataSource = self
-            collectionView.delegate = self
-        }
-    }
-    
+    @IBOutlet weak var xMarkImage: UIImageView!
+    @IBOutlet weak var buttonLabel: UIButton!
+    @IBOutlet weak var collectionView: UICollectionView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //парсинг данных из файла avitoData.json
+        xMarkImage.image = UIImage(named: "xmark")
+        buttonLabel.layer.cornerRadius = 5
+        collectionView.layer.cornerRadius = 5
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        
         loadJson(fileName: "avitoData")
         
         mainTitle.text = items[0].result.title
         
     }
     //MARK:- парсинг данных типа json
-    func loadJson(fileName: String) {
+    private func loadJson(fileName: String) {
         if let url = Bundle.main.url(forResource: fileName, withExtension: "json") {
             do {
                 let data = try Data(contentsOf: url)
                 let decoder = JSONDecoder()
                 let info = try decoder.decode(InfoModel.self, from: data)
-                // наполнение массива элементами после парсинга
                 items = [info]
             } catch let error {
                 print(error)
@@ -60,7 +45,6 @@ class MainViewController: UIViewController {
         }
     }
     
-    //MARK:- алерт при нажатии на кнопку
     @IBAction func chooseOption(_ sender: Any) {
         
         if items[0].result.list[0].isSelected == true {
@@ -70,7 +54,6 @@ class MainViewController: UIViewController {
             showAlert(title: items[0].result.list[1].title, message: nil)
         }
         
-        //вызов по дефолту
         showAlert(title: "Выберите товар", message: nil)
     }
 }
@@ -83,25 +66,24 @@ extension MainViewController: UICollectionViewDataSource, UICollectionViewDelega
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        var listOfItems = items[0].result.list[indexPath.item]
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "element", for: indexPath) as? MainCollectionViewCell  {
             
-            // настройка элементов в CollectionViewCell
             cell.layer.cornerRadius = 5
             cell.backgroundColor = .systemGray6
-            cell.priceLabel.text = items[0].result.list[indexPath.item].price
-            cell.titleLabel.text = items[0].result.list[indexPath.item].title
-            cell.descLabel.text = items[0].result.list[indexPath.item].description
+            cell.priceLabel.text = listOfItems.price
+            cell.titleLabel.text = listOfItems.title
+            cell.descLabel.text = listOfItems.description
             
-            // галочка появляется и исчезает при выборе ячейки
             if selectedCellIndex.contains(indexPath) {
                 cell.checkmark.isHidden = false
-                items[0].result.list[indexPath.item].isSelected = true
+                listOfItems.isSelected = true
             } else {
                 cell.checkmark.isHidden = true
-                items[0].result.list[indexPath.item].isSelected = false
+                listOfItems.isSelected = false
             }
             cell.checkmark.image = UIImage(named: "checkmark")
-            let data = try? Data(contentsOf: items[0].result.list[indexPath.item].icon.iconSize)
+            let data = try? Data(contentsOf: listOfItems.icon.iconSize)
             if let imageData = data {
                 cell.imageView.image = UIImage(data: imageData)
             }
@@ -112,7 +94,6 @@ extension MainViewController: UICollectionViewDataSource, UICollectionViewDelega
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        // условие появления/непоявления галочки
         if selectedCellIndex.contains(indexPath) {
             if let index = selectedCellIndex.firstIndex(of: indexPath) {
                 selectedCellIndex.remove(at: index)
@@ -124,7 +105,7 @@ extension MainViewController: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     //MARK:- создание алерта
-    func showAlert(title: String?, message: String?) {
+   private func showAlert(title: String?, message: String?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let action = UIAlertAction(title: "OK", style: .default, handler: nil)
         alert.addAction(action)

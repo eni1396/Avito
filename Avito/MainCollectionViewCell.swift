@@ -9,7 +9,6 @@ import UIKit
 
 class MainCollectionViewCell: UICollectionViewCell {
     
-    //MARK:- объявление ярлыков и картинок в ячейке
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descLabel: UILabel! 

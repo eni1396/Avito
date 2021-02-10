@@ -7,8 +7,6 @@
 
 import Foundation
 
-//MARK:- модель для декодинга JSON
-
 struct InfoModel: Decodable {
     var status: String?
     var result: Result
